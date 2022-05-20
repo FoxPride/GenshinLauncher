@@ -1,0 +1,98 @@
+﻿<Window
+    x:Class="GenshinLauncher.Views.MainWindowView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" mc:Ignorable="d"
+
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:s="https://github.com/canton7/Stylet"
+
+    xmlns:viewModels="clr-namespace:GenshinLauncher.ViewModels"
+    xmlns:genshinLauncher="clr-namespace:GenshinLauncher"
+    xmlns:models="clr-namespace:GenshinLauncher.Models"
+    d:DataContext="{d:DesignInstance Type=viewModels:MainWindowViewModel}"
+
+    Title="{x:Static viewModels:MainWindowViewModel.Title}"
+    Width="500" Height="600"
+    MinWidth="500" MinHeight="600"
+    ui:WindowHelper.UseModernWindowStyle="True"
+    ui:TitleBar.ExtendViewIntoTitleBar="True">
+
+    <Window.Resources>
+        <genshinLauncher:Config x:Key="Config" />
+        <Style TargetType="ui:NumberBox">
+            <Setter Property="SpinButtonPlacementMode" Value="Compact" />
+            <Setter Property="Minimum" Value="0" />
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer Margin="30">
+        <ui:SimpleStackPanel>
+            <TextBlock
+                Style="{StaticResource TitleTextBlockStyle}"
+                Text="{x:Static viewModels:MainWindowViewModel.Title}" />
+
+            <ui:SimpleStackPanel Orientation="Horizontal">
+                <ui:ToggleSwitch
+                    Header="Fullscreen"
+                    IsOn="{Binding Default.Fullscreen, Source={StaticResource Config}}" />
+
+                <ui:ToggleSwitch
+                    Header="Borderless"
+                    IsOn="{Binding Default.Borderless, Source={StaticResource Config}}" />
+            </ui:SimpleStackPanel>
+
+            <GroupBox Header="Quality">
+                <ComboBox ItemsSource="{Binding Quality.Qualities}"
+                          SelectedItem="{Binding Quality.SelectedQuality}" />
+            </GroupBox>
+
+            <ui:SimpleStackPanel Orientation="Horizontal">
+                <GroupBox Header="Resolution">
+                    <ui:SimpleStackPanel Orientation="Horizontal">
+                        <ui:NumberBox Header="Width" Value="{Binding Resolution.Width}" />
+                        <ui:NumberBox Header="Height" Value="{Binding Resolution.Height}" />
+                    </ui:SimpleStackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Preset">
+                    <ComboBox
+                        Margin="0,25,0,0"
+                        ItemsSource="{x:Static models:Resolution.Presets}"
+                        SelectedItem="{Binding Resolution}" />
+                </GroupBox>
+            </ui:SimpleStackPanel>
+            <GroupBox Header="Path">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" TextWrapping="WrapWithOverflow" 
+                             PreviewMouseDown="{s:Action SetLocation}" IsReadOnly="True"
+                             Text="{Binding Location, Mode=OneWay}"  />
+
+                    <Button Grid.Column="1" Margin="5,0,0,0"
+                            Command="{s:Action SetLocation}">
+                        <ui:FontIcon Glyph="&#xE8E5;" />
+                    </Button>
+                </Grid>
+            </GroupBox>
+
+            <ui:SimpleStackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right">
+                <Button Command="{s:Action LaunchGame}"
+                        Content="Launch Game" />
+
+                <Button Command="{s:Action LaunchSelector}"
+                        Content="Controller Settings" />
+
+                <Button Command="{s:Action RequestClose}"
+                        Content="Exit" />
+            </ui:SimpleStackPanel>
+        </ui:SimpleStackPanel>
+    </ScrollViewer>
+</Window>
