@@ -1,0 +1,228 @@
+﻿<Window
+    x:Class="GenshinLauncher.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:GenshinLauncher.Models"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:viewmodels="clr-namespace:GenshinLauncher.ViewModels"
+    xmlns:wpfui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Width="460"
+    Height="573"
+    ResizeMode="NoResize"
+    Style="{StaticResource UiWindow}"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/GenshinLauncher;component/Resources/Icons.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <system:Double x:Key="DefaultHeaderSize">20</system:Double>
+            <ObjectDataProvider
+                x:Key="QualityEnum"
+                MethodName="GetValues"
+                ObjectType="{x:Type system:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="models:Quality" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.DataContext>
+        <viewmodels:MainWindowViewModel />
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <wpfui:TitleBar Grid.Row="0" ShowMaximize="False" />
+
+        <StackPanel Grid.Row="1" Margin="30,0,30,20">
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <Image Width="200" Source="{StaticResource GenshinImpactLogo}" />
+                <TextBlock
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    FontSize="39"
+                    Text="Launcher" />
+            </StackPanel>
+            <ListBox
+                Height="110"
+                Margin="0,20,0,0"
+                DisplayMemberPath="Name"
+                ItemsSource="{Binding Accounts}"
+                SelectedItem="{Binding SelectedAccount}">
+                <ListBox.Style>
+                    <Style TargetType="{x:Type ListBox}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <Border
+                                                Padding="10"
+                                                BorderBrush="Black"
+                                                BorderThickness="1">
+                                                <TextBlock Foreground="{StaticResource TextRegular}" Text="Add new account" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.Style>
+            </ListBox>
+            <DockPanel Margin="0,5,0,0">
+                <Button
+                    HorizontalAlignment="Left"
+                    Background="{DynamicResource PaletteLightBlueBrush}"
+                    Command="{Binding ShowAddAccountDialogCommand}">
+                    <TextBlock Text="Add current" />
+                </Button>
+                <Button
+                    HorizontalAlignment="Right"
+                    Background="{DynamicResource PaletteLightBlueBrush}"
+                    Command="{Binding DeleteAccountCommand}">
+                    <TextBlock Text="Delete selected" />
+                </Button>
+            </DockPanel>
+            <Button
+                Margin="0,10,0,0"
+                Background="{DynamicResource PaletteBlueBrush}"
+                Command="{Binding LaunchGameCommand}">
+                <TextBlock FontSize="25" Text="Launch Game" />
+            </Button>
+
+            <StackPanel
+                Margin="0,20,0,0"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal">
+                <wpfui:ToggleSwitch Margin="0,0,10,0" IsChecked="{Binding SelectedAccount.IsFullScreen}">
+                    <TextBlock Text="Fullscreen" />
+                </wpfui:ToggleSwitch>
+                <wpfui:ToggleSwitch Margin="10,0,0,0" IsChecked="{Binding SelectedAccount.IsBorderLess}">
+                    <TextBlock Text="Borderless" />
+                </wpfui:ToggleSwitch>
+            </StackPanel>
+
+            <StackPanel
+                Margin="0,20,0,0"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal">
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock FontSize="{StaticResource DefaultHeaderSize}" Text="Quality" />
+                    <ComboBox
+                        Width="150"
+                        Margin="0,10,0,0"
+                        ItemsSource="{Binding Source={StaticResource QualityEnum}}"
+                        SelectedItem="{Binding SelectedAccount.SelectedQuality}" />
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0">
+                    <TextBlock FontSize="{StaticResource DefaultHeaderSize}" Text="Preset" />
+                    <ComboBox
+                        Width="150"
+                        Margin="0,10,0,0"
+                        ItemsSource="{x:Static models:Resolution.Presets}"
+                        SelectedItem="{Binding SelectedAccount.Preset}" />
+                    <Button
+                        Margin="0,10,0,0"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ShowAddPresetDialogCommand}">
+                        <TextBlock Text="Add custom" />
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+
+            <DockPanel Margin="0,20,0,0" LastChildFill="True">
+                <wpfui:Button
+                    Width="36"
+                    Height="36"
+                    Margin="10,0,0,0"
+                    Command="{Binding SetLocationCommand}"
+                    DockPanel.Dock="Right"
+                    Icon="Folder24" />
+                <wpfui:TextBox
+                    IsReadOnly="True"
+                    Placeholder="Genshin Impact Path"
+                    Text="{Binding SelectedAccount.Location}" />
+            </DockPanel>
+        </StackPanel>
+
+        <wpfui:Dialog
+            x:Name="AddPresetDialog"
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            ButtonLeftName="Add"
+            ButtonRightName="Cancel"
+            IsShown="False">
+            <StackPanel
+                Margin="0,10,0,0"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal">
+                <StackPanel Margin="0,0,5,0">
+                    <TextBlock
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Center"
+                        Text="Width" />
+                    <wpfui:NumberBox
+                        Width="150"
+                        Margin="0,5,0,0"
+                        Icon="ArrowAutofitWidth20"
+                        IntegersOnly="True"
+                        Max="5000"
+                        Min="200"
+                        Step="1"
+                        Text="{Binding Width}" />
+                </StackPanel>
+                <StackPanel Margin="5,0,0,0">
+                    <TextBlock
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Center"
+                        Text="Height" />
+                    <wpfui:NumberBox
+                        Width="150"
+                        Margin="0,5,0,0"
+                        Icon="ArrowAutofitHeight20"
+                        IntegersOnly="True"
+                        Max="5000"
+                        Min="200"
+                        Step="1"
+                        Text="{Binding Height}" />
+                </StackPanel>
+            </StackPanel>
+        </wpfui:Dialog>
+
+        <wpfui:Dialog
+            x:Name="AddAccountDialog"
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            ButtonLeftName="Add"
+            ButtonRightName="Cancel"
+            IsShown="False">
+            <Grid>
+                <wpfui:TextBox
+                    Height="20"
+                    Placeholder="Name your account"
+                    Text="{Binding AccountName}" />
+            </Grid>
+        </wpfui:Dialog>
+
+        <wpfui:Snackbar
+            x:Name="RootSnackbar"
+            Title="Test"
+            Grid.Row="1"
+            MaxWidth="400"
+            IsShown="False"
+            Message="Test message"
+            ShowCloseButton="True"
+            Timeout="3000" />
+    </Grid>
+</Window>

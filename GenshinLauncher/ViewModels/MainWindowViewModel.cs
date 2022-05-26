@@ -1,169 +1,256 @@
-﻿using System;
+﻿using CliWrap;
+using CliWrap.Builders;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using GenshinLauncher.Helpers;
+using GenshinLauncher.Models;
+using GenshinLauncher.Views;
+using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CliWrap;
-using GenshinLauncher.Models;
-using Microsoft.Win32;
-using ModernWpf.Controls;
-using Stylet;
+using System.Windows;
+using WPFUI.Common;
+using WPFUI.Controls;
 
 namespace GenshinLauncher.ViewModels
 {
-    public class MainWindowViewModel : Screen
+    public partial class MainWindowViewModel : ObservableObject
     {
-        public const string Title = "Genshin Impact Launcher";
-
-        public MainWindowViewModel()
+        public Account? SelectedAccount
         {
-            Quality    = new();
-            Resolution = GetLastResolution();
-        }
-
-        public Command Client => Cli.Wrap(Location);
-
-        public QualityViewModel Quality { get; }
-
-        public Resolution Resolution { get; set; }
-
-        public string Location
-        {
-            get => Config.Default.GenshinLocation;
-            set => Config.Default.GenshinLocation = value;
-        }
-
-        private static string? InstallLocation => Registry.LocalMachine
-            .OpenSubKey(@"SOFTWARE\launcher", false)
-            ?.GetValue("InstPath") as string;
-
-        public async Task<CommandResult> LaunchSelector() =>
-            await Client.WithArguments("-show-screen-selector")
-                .ExecuteAsync();
-
-        protected override async void OnInitialActivate()
-        {
-            if (!TryGetLocation())
-                await LocationMissing();
-        }
-
-        private async Task LocationMissing()
-        {
-            var dialog = new ContentDialog
+            get => App.Config.SelectedAccount;
+            set
             {
-                Title   = "Error",
-                Content = "Could not find Game's Location",
+                if (App.Config.SelectedAccount == value) return;
 
-                PrimaryButtonText   = "Find Manually...",
-                SecondaryButtonText = "Ignore",
-                CloseButtonText     = "Exit"
-            };
+                App.Config.SelectedAccount = value;
+                OnPropertyChanged();
 
-            var result = await dialog.ShowAsync();
+                if (value == null) return;
 
-            switch (result)
-            {
-                case ContentDialogResult.None:
-                    RequestClose();
-                    break;
-                case ContentDialogResult.Primary:
-                    await SetLocation();
-                    break;
-                case ContentDialogResult.Secondary:
-                    break;
-            }
-        }
-
-        public async Task SetLocation()
-        {
-            var openFileDialog = new OpenFileDialog
-            {
-                Filter = "Executable|*.exe|All files (*.*)|*.*",
-                InitialDirectory = InstallLocation is null
-                    ? string.Empty
-                    : Path.Combine(InstallLocation, "Genshin Impact Game")
-            };
-
-            var success = openFileDialog.ShowDialog() == true;
-            var set = TrySetLocation(openFileDialog.FileName);
-
-            if (!(success && set)) await LocationMissing();
-        }
-
-        private Resolution GetLastResolution()
-        {
-            var config = Registry.CurrentUser
-                .OpenSubKey(@"SOFTWARE\miHoYo\Genshin Impact", false);
-
-            var w = config.GetValue(@"Screenmanager Resolution Width_h182942802");
-            var h = config.GetValue(@"Screenmanager Resolution Height_h2627697771");
-
-            if (w is int width && h is int height)
-                return Resolution.GetResolution(width, height);
-
-            return Resolution.Presets.Last();
-        }
-
-        private bool TryGetLocation()
-        {
-            var locations = new[]
-            {
-                // User set location
-                Location,
-
-                // Default install location
-                @"C:\Program Files\Genshin Impact\Genshin Impact Game\GenshinImpact.exe",
-
-                // Custom install location
-                Path.Combine(InstallLocation ?? string.Empty, @"Genshin Impact Game\GenshinImpact.exe"),
-
-                // Relative location
-                AppContext.BaseDirectory + "GenshinImpact.exe"
-            };
-
-            return locations.Any(TrySetLocation);
-        }
-
-        private bool TrySetLocation(string? location)
-        {
-            if (File.Exists(location) && location is not null)
-            {
-                Location = location;
-                return true;
-            }
-
-            return false;
-        }
-
-        public async Task LaunchGame()
-        {
-            var client = Client
-                .WithArguments(args =>
+                if (RegistryHelper.UpdateAccountInRegistry(value))
                 {
-                    args
-                        .Add("-screen-width").Add(Resolution.Width)
-                        .Add("-screen-height").Add(Resolution.Height)
-                        .Add("-screen-fullscreen").Add(Config.Default.Fullscreen ? 1 : 0);
+                    ShowSnackChangeAccountSuccess();
+                }
+                else
+                {
+                    ShowSnackChangeAccountWarning();
+                }
+            }
+        }
 
-                    if (Config.Default.Borderless)
-                        args.Add("-popupwindow");
+        public ObservableCollection<Account> Accounts
+        {
+            get => App.Config.Accounts;
+            set
+            {
+                if (App.Config.Accounts == value) return;
 
-                    if (Quality.SelectedQuality != Models.Quality.Default)
-                        args.Add("-screen-quality").Add(Quality.SelectedQuality);
-                });
+                App.Config.Accounts = value;
+                OnPropertyChanged();
+            }
+        }
 
+        [ObservableProperty]
+        private int _width = 800;
+
+        [ObservableProperty]
+        private int _height = 600;
+
+        private bool _isPresetDialogSubscribed;
+
+        [ObservableProperty]
+        private string _accountName;
+
+        private bool _isAccountDialogSubscribed;
+
+        private static void ShowSnackWarning()
+        {
+            var snackBar = (Application.Current.MainWindow as MainWindow)?.RootSnackbar;
+
+            if (snackBar == null) return;
+
+            snackBar.Appearance = Appearance.Danger;
+            snackBar.Icon = SymbolRegular.Warning24;
+            snackBar.Show("Error!", "Please add an account first!");
+        }
+
+        private static void ShowSnackChangeAccountWarning()
+        {
+            var snackBar = (Application.Current.MainWindow as MainWindow)?.RootSnackbar;
+
+            if (snackBar == null) return;
+
+            snackBar.Appearance = Appearance.Danger;
+            snackBar.Icon = SymbolRegular.Warning24;
+            snackBar.Show("Error!", "Account change failed!");
+        }
+
+        private static void ShowSnackChangeAccountSuccess()
+        {
+            var snackBar = (Application.Current.MainWindow as MainWindow)?.RootSnackbar;
+
+            if (snackBar == null) return;
+
+            snackBar.Appearance = Appearance.Success;
+            snackBar.Icon = SymbolRegular.Checkmark28;
+            snackBar.Show("Success!", "Successfully changed account!");
+        }
+
+        [ICommand]
+        private void DeleteAccount()
+        {
+            if (SelectedAccount == null)
+            {
+                ShowSnackWarning();
+                return;
+            }
+
+            Accounts.Remove(SelectedAccount);
+            SelectedAccount = Accounts.FirstOrDefault();
+        }
+
+        [ICommand]
+        private void SetLocation()
+        {
+            if (SelectedAccount == null)
+            {
+                ShowSnackWarning();
+                return;
+            }
+
+            var text = LocationHelper.SetLocation();
+            if (!string.IsNullOrEmpty(text))
+            {
+                SelectedAccount.Location = text;
+            }
+        }
+
+        [ICommand]
+        private async Task LaunchGame()
+        {
+            if (SelectedAccount == null)
+            {
+                ShowSnackWarning();
+                return;
+            }
+
+            var client = Cli.Wrap(SelectedAccount.Location);
+
+            var command = client.WithArguments(delegate (ArgumentsBuilder args)
+            {
+                args.Add("-screen-width").Add(SelectedAccount.Preset.Width)
+                    .Add("-screen-height").Add(SelectedAccount.Preset.Height)
+                    .Add("-screen-fullscreen").Add(SelectedAccount.IsFullScreen ? 1 : 0);
+
+                if (SelectedAccount.IsBorderLess)
+                {
+                    args.Add("-popupwindow");
+                }
+                if (SelectedAccount.SelectedQuality != 0)
+                {
+                    args.Add("-screen-quality").Add(SelectedAccount.SelectedQuality);
+                }
+            });
             try
             {
-                await client.ExecuteAsync();
+                await command.ExecuteAsync();
             }
             catch (InvalidOperationException)
             {
-                await LocationMissing();
+                LocationHelper.SetLocation();
             }
             catch (Win32Exception)
             {
-                await LocationMissing();
+                LocationHelper.SetLocation();
             }
+        }
+
+        [ICommand]
+        private void ShowAddAccountDialog()
+        {
+            var dialog = (Application.Current.MainWindow as MainWindow)?.AddAccountDialog;
+
+            if (dialog == null) return;
+
+            if (!_isAccountDialogSubscribed)
+            {
+                dialog.ButtonLeftClick += (_, _) =>
+                {
+                    var account = new Account
+                    {
+                        Name = string.IsNullOrEmpty(AccountName) ? "Default" : AccountName,
+                        Id = Guid.NewGuid()
+                    };
+
+                    Accounts.Add(account);
+
+                    SelectedAccount = account;
+
+                    CloseAddAccountDialogAndReset(dialog);
+                };
+
+                dialog.ButtonRightClick += (_, _) =>
+                {
+                    CloseAddAccountDialogAndReset(dialog);
+                };
+
+                _isAccountDialogSubscribed = true;
+            }
+
+            dialog.Show();
+        }
+
+        private void CloseAddAccountDialogAndReset(Dialog dialog)
+        {
+            AccountName = string.Empty;
+
+            dialog.Hide();
+        }
+
+        [ICommand]
+        private void ShowAddPresetDialog()
+        {
+            if (SelectedAccount == null)
+            {
+                ShowSnackWarning();
+                return;
+            }
+
+            var dialog = (Application.Current.MainWindow as MainWindow)?.AddPresetDialog;
+
+            if (dialog == null) return;
+
+            if (!_isPresetDialogSubscribed)
+            {
+                dialog.ButtonLeftClick += (_, _) =>
+                {
+                    SelectedAccount.Preset = Resolution.GetResolution(Width, Height);
+
+                    OnPropertyChanged(nameof(SelectedAccount));
+
+                    CloseAddPresetDialogAndReset(dialog);
+                };
+
+                dialog.ButtonRightClick += (_, _) =>
+                {
+                    CloseAddPresetDialogAndReset(dialog);
+                };
+
+                _isPresetDialogSubscribed = true;
+            }
+
+            dialog.Show();
+        }
+
+        private void CloseAddPresetDialogAndReset(Dialog dialog)
+        {
+            Width = 800;
+            Height = 600;
+
+            dialog.Hide();
         }
     }
 }
