@@ -84,7 +84,8 @@
                 <Button
                     HorizontalAlignment="Left"
                     Background="{DynamicResource PaletteLightBlueBrush}"
-                    Command="{Binding ShowAddAccountDialogCommand}">
+                    Command="{Binding ShowAddAccountDialogCommand}"
+                    ToolTip="Adds currently logged in account">
                     <TextBlock Text="Add current" />
                 </Button>
                 <Button
@@ -108,8 +109,15 @@
                 <wpfui:ToggleSwitch Margin="0,0,10,0" IsChecked="{Binding SelectedAccount.IsFullScreen}">
                     <TextBlock Text="Fullscreen" />
                 </wpfui:ToggleSwitch>
-                <wpfui:ToggleSwitch Margin="10,0,0,0" IsChecked="{Binding SelectedAccount.IsBorderLess}">
+                <wpfui:ToggleSwitch Margin="10,0,10,0" IsChecked="{Binding SelectedAccount.IsBorderLess}">
                     <TextBlock Text="Borderless" />
+                </wpfui:ToggleSwitch>
+
+                <wpfui:ToggleSwitch
+                    Margin="10,0,0,0"
+                    IsChecked="{Binding SelectedAccount.IsCloseBeforeStart}"
+                    ToolTip="Closes Genshin Impact client before launching new">
+                    <TextBlock Text="Close before start" />
                 </wpfui:ToggleSwitch>
             </StackPanel>
 

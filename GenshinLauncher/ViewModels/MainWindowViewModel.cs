@@ -8,6 +8,7 @@ using GenshinLauncher.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -154,6 +155,20 @@ namespace GenshinLauncher.ViewModels
                     args.Add("-screen-quality").Add(SelectedAccount.SelectedQuality);
                 }
             });
+
+            if (SelectedAccount.IsCloseBeforeStart)
+            {
+                var processes = Process.GetProcessesByName("GenshinImpact");
+                foreach (var process in processes)
+                {
+                    process.Kill();
+                    await process.WaitForExitAsync();
+                    process.Dispose();
+                }
+
+                RegistryHelper.UpdateAccountInRegistry(SelectedAccount);
+            }
+
             try
             {
                 await command.ExecuteAsync();

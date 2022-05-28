@@ -13,6 +13,7 @@ namespace GenshinLauncher.Models
         public bool IsBorderLess { get; set; }
 
         public bool IsFullScreen { get; set; }
+        public bool IsCloseBeforeStart { get; set; }
 
         public string Location { get; set; }
 
@@ -34,11 +35,12 @@ namespace GenshinLauncher.Models
             Location = LocationHelper.GetLocation();
             IsFullScreen = false;
             IsBorderLess = true;
+            IsCloseBeforeStart = false;
             Id = Guid.Empty;
         }
 
         [JsonConstructor]
-        public Account(string name, string accountString, string settingsString, Quality selectedQuality, Resolution preset, string location, bool isFullScreen, bool isBorderLess, Guid id)
+        public Account(string name, string accountString, string settingsString, Quality selectedQuality, Resolution preset, string location, bool isFullScreen, bool isBorderLess, bool isCloseBeforeStart, Guid id)
         {
             Name = name;
             AccountString = accountString;
@@ -48,6 +50,7 @@ namespace GenshinLauncher.Models
             Location = location;
             IsFullScreen = isFullScreen;
             IsBorderLess = isBorderLess;
+            IsCloseBeforeStart = isCloseBeforeStart;
             Id = id;
         }
     }
