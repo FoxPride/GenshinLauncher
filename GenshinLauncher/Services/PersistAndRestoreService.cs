@@ -20,12 +20,19 @@ namespace GenshinLauncher.Services
                 return new AppConfig();
             }
 
-            var properties = JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(settingsLocation), new JsonSerializerSettings
+            try
             {
-                MissingMemberHandling = MissingMemberHandling.Error
-            });
+                var properties = JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(settingsLocation), new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                });
 
-            return properties ?? new AppConfig();
+                return properties ?? new AppConfig();
+            }
+            catch
+            {
+                return new AppConfig();
+            }
         }
 
         public static void SaveSettings()
