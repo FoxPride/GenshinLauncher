@@ -19,6 +19,31 @@ namespace GenshinLauncher.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private string _accountName;
+
+        [ObservableProperty]
+        private int _height = 600;
+
+        private bool _isAccountDialogSubscribed;
+
+        private bool _isPresetDialogSubscribed;
+
+        [ObservableProperty]
+        private int _width = 800;
+
+        public ObservableCollection<Account> Accounts
+        {
+            get => App.Config.Accounts;
+            set
+            {
+                if (App.Config.Accounts == value) return;
+
+                App.Config.Accounts = value;
+                OnPropertyChanged();
+            }
+        }
+
         public Account? SelectedAccount
         {
             get => App.Config.SelectedAccount;
@@ -42,40 +67,15 @@ namespace GenshinLauncher.ViewModels
             }
         }
 
-        public ObservableCollection<Account> Accounts
-        {
-            get => App.Config.Accounts;
-            set
-            {
-                if (App.Config.Accounts == value) return;
-
-                App.Config.Accounts = value;
-                OnPropertyChanged();
-            }
-        }
-
-        [ObservableProperty]
-        private int _width = 800;
-
-        [ObservableProperty]
-        private int _height = 600;
-
-        private bool _isPresetDialogSubscribed;
-
-        [ObservableProperty]
-        private string _accountName;
-
-        private bool _isAccountDialogSubscribed;
-
-        private static void ShowSnackWarning()
+        private static void ShowSnackChangeAccountSuccess()
         {
             var snackBar = (Application.Current.MainWindow as MainWindow)?.RootSnackbar;
 
             if (snackBar == null) return;
 
-            snackBar.Appearance = Appearance.Danger;
-            snackBar.Icon = SymbolRegular.Warning24;
-            snackBar.Show("Error!", "Please add an account first!");
+            snackBar.Appearance = Appearance.Success;
+            snackBar.Icon = SymbolRegular.Checkmark28;
+            snackBar.Show("Success!", "Successfully changed account!");
         }
 
         private static void ShowSnackChangeAccountWarning()
@@ -89,15 +89,30 @@ namespace GenshinLauncher.ViewModels
             snackBar.Show("Error!", "Account change failed!");
         }
 
-        private static void ShowSnackChangeAccountSuccess()
+        private static void ShowSnackWarning()
         {
             var snackBar = (Application.Current.MainWindow as MainWindow)?.RootSnackbar;
 
             if (snackBar == null) return;
 
-            snackBar.Appearance = Appearance.Success;
-            snackBar.Icon = SymbolRegular.Checkmark28;
-            snackBar.Show("Success!", "Successfully changed account!");
+            snackBar.Appearance = Appearance.Danger;
+            snackBar.Icon = SymbolRegular.Warning24;
+            snackBar.Show("Error!", "Please add an account first!");
+        }
+
+        private void CloseAddAccountDialogAndReset(Dialog dialog)
+        {
+            AccountName = string.Empty;
+
+            dialog.Hide();
+        }
+
+        private void CloseAddPresetDialogAndReset(Dialog dialog)
+        {
+            Width = 800;
+            Height = 600;
+
+            dialog.Hide();
         }
 
         [ICommand]
@@ -111,22 +126,6 @@ namespace GenshinLauncher.ViewModels
 
             Accounts.Remove(SelectedAccount);
             SelectedAccount = Accounts.FirstOrDefault();
-        }
-
-        [ICommand]
-        private void SetLocation()
-        {
-            if (SelectedAccount == null)
-            {
-                ShowSnackWarning();
-                return;
-            }
-
-            var text = LocationHelper.SetLocation();
-            if (!string.IsNullOrEmpty(text))
-            {
-                SelectedAccount.Location = text;
-            }
         }
 
         [ICommand]
@@ -184,6 +183,46 @@ namespace GenshinLauncher.ViewModels
         }
 
         [ICommand]
+        private void MoveItemDown()
+        {
+            if (SelectedAccount == null) return;
+
+            var selectedIndex = Accounts.IndexOf(SelectedAccount);
+            if (selectedIndex < 0 || selectedIndex + 1 >= Accounts.Count)
+                return;
+
+            Accounts.Move(selectedIndex + 1, selectedIndex);
+        }
+
+        [ICommand]
+        private void MoveItemUp()
+        {
+            if (SelectedAccount == null) return;
+
+            var selectedIndex = Accounts.IndexOf(SelectedAccount);
+            if (selectedIndex > 0)
+            {
+                Accounts.Move(selectedIndex - 1, selectedIndex);
+            }
+        }
+
+        [ICommand]
+        private void SetLocation()
+        {
+            if (SelectedAccount == null)
+            {
+                ShowSnackWarning();
+                return;
+            }
+
+            var text = LocationHelper.SetLocation();
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                SelectedAccount.Location = text;
+            }
+        }
+
+        [ICommand]
         private void ShowAddAccountDialog()
         {
             var dialog = (Application.Current.MainWindow as MainWindow)?.AddAccountDialog;
@@ -196,7 +235,7 @@ namespace GenshinLauncher.ViewModels
                 {
                     var account = new Account
                     {
-                        Name = string.IsNullOrEmpty(AccountName) ? "Default" : AccountName,
+                        Name = string.IsNullOrWhiteSpace(AccountName) ? "Default" : AccountName,
                         Id = Guid.NewGuid()
                     };
 
@@ -216,13 +255,6 @@ namespace GenshinLauncher.ViewModels
             }
 
             dialog.Show();
-        }
-
-        private void CloseAddAccountDialogAndReset(Dialog dialog)
-        {
-            AccountName = string.Empty;
-
-            dialog.Hide();
         }
 
         [ICommand]
@@ -258,14 +290,6 @@ namespace GenshinLauncher.ViewModels
             }
 
             dialog.Show();
-        }
-
-        private void CloseAddPresetDialogAndReset(Dialog dialog)
-        {
-            Width = 800;
-            Height = 600;
-
-            dialog.Hide();
         }
     }
 }
