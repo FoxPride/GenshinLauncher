@@ -1,4 +1,4 @@
-<Window
+﻿<Window
     x:Class="GenshinLauncher.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -45,14 +45,7 @@
         <wpfui:TitleBar Grid.Row="0" ShowMaximize="False" />
 
         <StackPanel Grid.Row="1" Margin="25,0,25,20">
-            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                <Image Width="200" Source="{StaticResource GenshinImpactLogo}" />
-                <TextBlock
-                    Margin="10,0,0,0"
-                    VerticalAlignment="Center"
-                    FontSize="39"
-                    Text="Launcher" />
-            </StackPanel>
+            <Image Width="200" Source="{StaticResource GenshinImpactLogo}" />
             <ListBox
                 Height="110"
                 Margin="0,20,0,0"
@@ -83,7 +76,6 @@
             <Grid Margin="0,5,0,0">
                 <Button
                     HorizontalAlignment="Left"
-                    Background="{DynamicResource PaletteLightBlueBrush}"
                     Command="{Binding ShowAddAccountDialogCommand}"
                     ToolTip="Adds currently logged in account">
                     <TextBlock Text="Add current" />
@@ -107,10 +99,7 @@
                         Icon="ArrowDown24" />
                 </StackPanel>
 
-                <Button
-                    HorizontalAlignment="Right"
-                    Background="{DynamicResource PaletteLightBlueBrush}"
-                    Command="{Binding DeleteAccountCommand}">
+                <Button HorizontalAlignment="Right" Command="{Binding DeleteAccountCommand}">
                     <TextBlock Text="Delete selected" />
                 </Button>
             </Grid>
