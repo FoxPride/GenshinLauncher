@@ -1,14 +1,22 @@
-# Genshin Impact Launcher [![GitHub release (latest by date)](https://img.shields.io/github/v/release/sabihoshi/GenshinLauncher)](https://github.com/sabihoshi/GenshinLauncher/releases/latest)
+# Genshin Impact Launcher [![GitHub release (latest by date)](https://img.shields.io/github/v/release/FoxPride/GenshinLauncher)](https://github.com/FoxPride/GenshinLauncher/releases/latest)
 
-A Genshin Impact launcher  made using C# and WPF using Windows Fluent design. If you enjoyed this project, consider [contributing](https://github.com/sabihoshi/GenshinLauncher#contributing) or 🌟 starring the repository. Thank you~
+A Genshin Impact launcher with account management made using C# and WPF. If you enjoyed this project, consider [contributing](https://github.com/FoxPride/GenshinLauncher#contributing) or 🌟 starring the repository. Thank you~
 
-## **[Download latest version](https://github.com/sabihoshi/GenshinLauncher/releases/latest)** ![GitHub all releases](https://img.shields.io/github/downloads/sabihoshi/GenshinLauncher/total?style=social)
+> **_NOTE:_**  This version is an rewrite of the [GenshinLauncher](https://github.com/sabihoshi/GenshinLauncher)
 
-![GenshinLauncher_2021-05-02_23-22-24](https://user-images.githubusercontent.com/25006819/116818301-4887b300-ab9d-11eb-8308-86705bc15e2e.png)
+## Why was this version created?
+The main focus here has been to update the tools to net6.0 and add account management system.
+
+- Visual part was completly rewritten with [WPF UI](https://github.com/lepoco/wpfui)
+- MVVM logic updated using [.NET Community Toolkit](https://github.com/CommunityToolkit/dotnet)
+
+## **[Download latest version](https://github.com/FoxPride/GenshinLauncher/releases/latest)** ![GitHub all releases](https://img.shields.io/github/downloads/FoxPride/GenshinLauncher/total?style=social)
+
+![GenshinLauncher](https://user-images.githubusercontent.com/30706733/170900441-ec549fa3-3dd5-4eaa-9bc9-a5466b602828.png)
 
 ## How to use
 
-1. [Download the program](https://github.com/sabihoshi/GenshinLauncher/releases/latest) and then run, no need for installation.
+1. [Download the program](https://github.com/FoxPride/GenshinLauncher/releases/latest) and then run, no need for installation.
 
 
 ## Features
@@ -16,12 +24,8 @@ A Genshin Impact launcher  made using C# and WPF using Windows Fluent design. If
 * Set the quality preset of the game.
 * Allow for borderless fullscreen gameplay.
 * Change the location of the .exe to a custom one.
-
-### Controller Settings
-This launches the unity screen selector for more options such as changing the joystick bindings as well as some other redundant options.
-
-## Upcoming
-* Create a shortcut to auto-apply settings.
+* Manage your genshin impact accounts.
+* Relaunch genshin impact with selected account.
 
 ## About
 
@@ -29,7 +33,7 @@ This launches the unity screen selector for more options such as changing the jo
 No it will not. This only uses [Unity command line arguments](https://docs.unity3d.com/Manual/CommandLineArguments.html) that are built in itself. It essentially just runs the game with extra flags such as `-popupwindow`. [Here is miHoYo's response](https://genshin.mihoyo.com/en/news/detail/5763) to using 3rd party tools.
 
 # Contributing
-When contributing to this repository, please first discuss the change you wish to make via issue, email (sabihoshi.dev@gmail.com), or any other method with me or the maintainers of this repository before making a change.
+When contributing to this repository, please first discuss the change you wish to make via issue, email (c1ee3517@opayq.com), or any other method with me or the maintainers of this repository before making a change.
 
 This project has a [Code of Conduct](CONTRIBUTING.md), please follow it in all your interactions with the project.
 
@@ -42,23 +46,23 @@ This project has a [Code of Conduct](CONTRIBUTING.md), please follow it in all y
 4. You may merge the Pull Request in once you have the the approval of the maintainers.
 
 ## Build
-If you just want to run the program, there are precompiled releases that can be found in [here](https://github.com/sabihoshi/GenshinLauncher/releases).
+If you just want to run the program, there are precompiled releases that can be found in [here](https://github.com/FoxPride/GenshinLauncher/releases).
 ### Requirements
 * [Git](https://git-scm.com) for cloning the project
-* [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1) SDK
+* [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0) SDK
 
 #### Publish a single binary for Windows
 ```bat
-git clone https://github.com/sabihoshi/GenshinLauncher.git
+git clone https://github.com/FoxPride/GenshinLauncher.git
 cd GenshinLauncher\GenshinLauncher
 
-dotnet publish -r win-x86 --framework netcoreapp3.1 -o bin\publish --no-self-contained -p:PublishSingleFile=true
+dotnet publish -r win-x64 --framework net6.0 -o bin\publish --no-self-contained -p:PublishSingleFile=true
 ```
 > For other runtimes, visit the [RID Catalog](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog) and change the runtime value.
 
 #### Build the project (not necessary if you published)
 ```bat
-git clone https://github.com/sabihoshi/GenshinLauncher.git
+git clone https://github.com/FoxPride/GenshinLauncher.git
 cd GenshinLauncher
 
 dotnet build
@@ -66,7 +70,7 @@ dotnet build
 
 #### Publish the project using defaults
 ```bat
-git clone https://github.com/sabihoshi/GenshinLauncher.git
+git clone https://github.com/FoxPride/GenshinLauncher.git
 cd GenshinLauncher
 
 dotnet publish
@@ -74,6 +78,6 @@ dotnet publish
 
 # License
 * This project is under the [MIT](LICENSE.md) license.
-* All rights reserved by © miHoYo Co., Ltd. This project is not affiliated nor endorsed by miHoYo. Genshin Impact™ and other properties belong to their respective owners.
+* All rights reserved by © Cognosphere Pte. Ltd. This project is not affiliated, nor endorsed by HoYoverse. Genshin Impact™ and other properties belong to their respective owners.
 * This project uses third-party libraries or other resources that may be
 distributed under [different licenses](/THIRD-PARTY-NOTICES.md).
