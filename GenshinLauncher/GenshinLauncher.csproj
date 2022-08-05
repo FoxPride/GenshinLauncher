@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.4.4" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="WPF-UI" Version="1.2.7" />
   </ItemGroup>
