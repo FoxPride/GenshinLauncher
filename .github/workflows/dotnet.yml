@@ -35,7 +35,7 @@ jobs:
       run: 7z a GenshinLauncher_${{ steps.tag.outputs.VERSION }}_${{ matrix.runtime }}.7z .\output\*
 
     - name: Create Release
-      uses: ncipollo/release-action@v1.11.2
+      uses: ncipollo/release-action@v1.12.0
       with:
           allowUpdates: true
           omitBodyDuringUpdate: true
